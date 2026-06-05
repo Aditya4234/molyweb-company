@@ -10,7 +10,7 @@ const corsOptions: cors.CorsOptions = {
     // Allow all origins in development, otherwise check allowedOrigins
     if (process.env.NODE_ENV !== "production") {
       callback(null, true);
-    } else if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*")) {
+    } else if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes("*") || /\.vercel\.app$/.test(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`Origin ${origin} not allowed by CORS`));
