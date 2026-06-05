@@ -1,0 +1,1534 @@
+{
+  "info": {
+    "name": "MolyWeb Backend API",
+    "description": "Complete API collection for MolyWeb Invoice Billing System\n\n## Authentication\n1. First call **Auth > Login** with default admin credentials\n2. Copy the returned `token`\n3. Set it as the `authToken` variable in the collection (or use the auto-set script)\n\nBase URL: http://localhost:5000/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api", "type": "string" },
+    { "key": "authToken", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Authentication endpoints - some public, some protected",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"password123\",\n  \"name\": \"New User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "  pm.collectionVariables.set('authToken', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@molyweb.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@molyweb.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/forgot-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"TOKEN_FROM_FORGOT_PASSWORD\",\n  \"password\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/reset-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password123\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "change-password"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboard"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Invoices",
+      "item": [
+        {
+          "name": "List Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices?page=1&limit=10&status=paid&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"],
+              "query": [
+                { "key": "page", "value": "1", "description": "Page number" },
+                { "key": "limit", "value": "10", "description": "Items per page (max 100)" },
+                { "key": "status", "value": "paid", "description": "Filter by status: paid, pending, overdue, draft" },
+                { "key": "search", "value": "john", "description": "Search by clientName or email" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Invoices",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "all"]
+            }
+          }
+        },
+        {
+          "name": "Invoice Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Export Invoices CSV",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/export/csv",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "export", "csv"]
+            }
+          }
+        },
+        {
+          "name": "Get Invoice by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000"]
+            }
+          }
+        },
+        {
+          "name": "Create Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"CLIENT_ID_HERE\",\n  \"clientName\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"clientAddress\": \"123 Main St\",\n  \"clientCity\": \"New York\",\n  \"clientState\": \"NY\",\n  \"amount\": 1500.00,\n  \"paidAmount\": 0,\n  \"dueDate\": \"2026-06-30\",\n  \"status\": \"pending\",\n  \"items\": [\n    { \"description\": \"Web Development\", \"quantity\": 1, \"rate\": 1200, \"amount\": 1200 },\n    { \"description\": \"Hosting (Monthly)\", \"quantity\": 3, \"rate\": 100, \"amount\": 300 }\n  ],\n  \"invoiceDate\": \"2026-05-01\",\n  \"notes\": \"Payment due within 30 days\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices"]
+            }
+          }
+        },
+        {
+          "name": "Update Invoice (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientName\": \"John Doe Updated\",\n  \"email\": \"john.updated@example.com\",\n  \"amount\": 2000,\n  \"dueDate\": \"2026-07-15\",\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000"]
+            }
+          }
+        },
+        {
+          "name": "Patch Invoice (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\",\n  \"paidAmount\": 1500\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000"]
+            }
+          }
+        },
+        {
+          "name": "Delete Invoice",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000"]
+            }
+          }
+        },
+        {
+          "name": "Email Invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000/email",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000", "email"]
+            }
+          }
+        },
+        {
+          "name": "Send Payment Reminder",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/invoices/INV-EXAMPLE-000/remind",
+              "host": ["{{baseUrl}}"],
+              "path": ["invoices", "INV-EXAMPLE-000", "remind"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clients",
+      "item": [
+        {
+          "name": "List Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients?page=1&limit=10&status=active&search=john",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "active", "description": "active or inactive" },
+                { "key": "search", "value": "john", "description": "Search by name, company, or email" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Clients",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "all"]
+            }
+          }
+        },
+        {
+          "name": "Client Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Client by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/CLIENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "CLIENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Client",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"+1-555-1234\",\n  \"company\": \"Acme Corp\",\n  \"address\": \"456 Oak Ave, Suite 200\",\n  \"pincode\": \"10001\",\n  \"gstin\": \"GSTIN123456\",\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients"]
+            }
+          }
+        },
+        {
+          "name": "Update Client (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe Updated\",\n  \"email\": \"john.updated@example.com\",\n  \"company\": \"Acme Corp Updated\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients/CLIENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "CLIENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Client (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/clients/CLIENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "CLIENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Client",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/CLIENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["clients", "CLIENT_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "item": [
+        {
+          "name": "List Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/employees?page=1&limit=10&status=active&department=Engineering&search=jane",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "active", "description": "active, inactive, on-leave" },
+                { "key": "department", "value": "Engineering", "description": "Filter by department name" },
+                { "key": "search", "value": "jane", "description": "Search by firstName, lastName, email, or position" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/employees/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "all"]
+            }
+          }
+        },
+        {
+          "name": "Employee Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/employees/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/employees/EMPLOYEE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "EMPLOYEE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"phone\": \"+1-555-5678\",\n  \"department\": \"Engineering\",\n  \"position\": \"Senior Developer\",\n  \"salary\": 85000,\n  \"status\": \"active\",\n  \"joinDate\": \"2026-01-15\",\n  \"address\": \"789 Pine St\",\n  \"bankAccount\": \"1234567890\",\n  \"ifscCode\": \"BANK0123456\",\n  \"createLogin\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            }
+          }
+        },
+        {
+          "name": "Update Employee (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane.smith@example.com\",\n  \"position\": \"Lead Developer\",\n  \"salary\": 95000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees/EMPLOYEE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "EMPLOYEE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Employee (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"on-leave\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/employees/EMPLOYEE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "EMPLOYEE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/employees/EMPLOYEE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees", "EMPLOYEE_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Departments",
+      "item": [
+        {
+          "name": "List Departments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/departments?status=active&search=Engineering",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments"],
+              "query": [
+                { "key": "status", "value": "active", "description": "active or inactive" },
+                { "key": "search", "value": "Engineering", "description": "Search by name" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Department by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/departments/DEPT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "DEPT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"head\": \"Alice Johnson\",\n  \"budget\": 500000,\n  \"status\": \"active\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/departments",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments"]
+            }
+          }
+        },
+        {
+          "name": "Update Department (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"head\": \"Bob Williams\",\n  \"budget\": 600000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/departments/DEPT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "DEPT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Department (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/departments/DEPT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "DEPT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Department",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/departments/DEPT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["departments", "DEPT_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Attendance",
+      "item": [
+        {
+          "name": "List Attendance",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance?page=1&limit=10&employeeId=EMP_ID&date=2026-05-30",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "employeeId", "value": "EMP_ID", "description": "Filter by employee ID" },
+                { "key": "date", "value": "2026-05-30", "description": "Filter by date (YYYY-MM-DD)" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Attendance by Employee",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/employee/EMPLOYEE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance", "employee", "EMPLOYEE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Attendance Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"date\": \"2026-05-30\",\n  \"status\": \"present\",\n  \"checkIn\": \"09:00 AM\",\n  \"checkOut\": \"06:00 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendance",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance"]
+            }
+          }
+        },
+        {
+          "name": "Update Attendance (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"date\": \"2026-05-30\",\n  \"status\": \"half-day\",\n  \"checkIn\": \"10:00 AM\",\n  \"checkOut\": \"02:00 PM\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendance/ATTENDANCE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance", "ATTENDANCE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Attendance (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"absent\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/attendance/ATTENDANCE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance", "ATTENDANCE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Attendance",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/attendance/ATTENDANCE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["attendance", "ATTENDANCE_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leave",
+      "item": [
+        {
+          "name": "List Leave Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leave?page=1&limit=10&status=pending&employeeId=EMP_ID",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "pending", "description": "pending, approved, rejected" },
+                { "key": "employeeId", "value": "EMP_ID", "description": "Filter by employee ID" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Leave Request by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leave/LEAVE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave", "LEAVE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Leave Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"type\": \"vacation\",\n  \"startDate\": \"2026-06-10\",\n  \"endDate\": \"2026-06-15\",\n  \"reason\": \"Family vacation\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave"]
+            }
+          }
+        },
+        {
+          "name": "Update Leave Request (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"type\": \"personal\",\n  \"startDate\": \"2026-06-10\",\n  \"endDate\": \"2026-06-12\",\n  \"reason\": \"Personal matter\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave/LEAVE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave", "LEAVE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Leave Request (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"approved\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/leave/LEAVE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave", "LEAVE_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Leave Request",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leave/LEAVE_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["leave", "LEAVE_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payroll",
+      "item": [
+        {
+          "name": "List Payroll Records",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll?page=1&limit=10&month=May&year=2026&status=paid",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "month", "value": "May", "description": "Filter by month name" },
+                { "key": "year", "value": "2026", "description": "Filter by year" },
+                { "key": "status", "value": "paid", "description": "paid, pending, processing" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payroll Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/summary",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "summary"]
+            }
+          }
+        },
+        {
+          "name": "Get Payroll Record by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/PAYROLL_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "PAYROLL_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Payroll Record",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"month\": \"May\",\n  \"year\": 2026,\n  \"basicSalary\": 7000,\n  \"allowances\": 1000,\n  \"deductions\": 500,\n  \"netSalary\": 7500,\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll"]
+            }
+          }
+        },
+        {
+          "name": "Update Payroll (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"EMPLOYEE_ID_HERE\",\n  \"employeeName\": \"Jane Smith\",\n  \"month\": \"May\",\n  \"year\": 2026,\n  \"basicSalary\": 7500,\n  \"allowances\": 1000,\n  \"deductions\": 500,\n  \"netSalary\": 8000\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/PAYROLL_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "PAYROLL_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Payroll (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payroll/PAYROLL_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "PAYROLL_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Payroll Record",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payroll/PAYROLL_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payroll", "PAYROLL_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payments",
+      "item": [
+        {
+          "name": "List Payments",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments?page=1&limit=10&status=completed&method=credit_card",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "completed", "description": "completed, pending, failed, refunded" },
+                { "key": "method", "value": "credit_card", "description": "credit_card, bank_transfer, cash, check, upi" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Payment Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/PAYMENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "PAYMENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceId\": \"INV-EXAMPLE-000\",\n  \"clientName\": \"John Doe\",\n  \"amount\": 1500.00,\n  \"method\": \"credit_card\",\n  \"status\": \"completed\",\n  \"date\": \"2026-05-30\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments"]
+            }
+          }
+        },
+        {
+          "name": "Update Payment (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"invoiceId\": \"INV-EXAMPLE-000\",\n  \"clientName\": \"John Doe\",\n  \"amount\": 1500,\n  \"method\": \"bank_transfer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/PAYMENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "PAYMENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Payment (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"refunded\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/payments/PAYMENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "PAYMENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Payment",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/PAYMENT_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["payments", "PAYMENT_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing",
+      "item": [
+        {
+          "name": "List Billing Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/billing?page=1&limit=10&status=active",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "status", "value": "active", "description": "active, cancelled, expired, trial" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Billing Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/billing/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Billing Plan by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/billing/BILLING_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing", "BILLING_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Create Billing Plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"CLIENT_ID_HERE\",\n  \"clientName\": \"Acme Corp\",\n  \"plan\": \"pro\",\n  \"amount\": 299.99,\n  \"status\": \"active\",\n  \"startDate\": \"2026-01-01\",\n  \"endDate\": \"2026-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/billing",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing"]
+            }
+          }
+        },
+        {
+          "name": "Update Billing Plan (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"CLIENT_ID_HERE\",\n  \"clientName\": \"Acme Corp\",\n  \"plan\": \"enterprise\",\n  \"amount\": 599.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/billing/BILLING_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing", "BILLING_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Patch Billing Plan (PATCH)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"cancelled\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/billing/BILLING_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing", "BILLING_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Delete Billing Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/billing/BILLING_ID_HERE",
+              "host": ["{{baseUrl}}"],
+              "path": ["billing", "BILLING_ID_HERE"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Stats",
+      "item": [
+        {
+          "name": "Get All Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats"]
+            }
+          }
+        },
+        {
+          "name": "Revenue Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats/revenue",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "revenue"]
+            }
+          }
+        },
+        {
+          "name": "Payment Status Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats/payment-status",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "payment-status"]
+            }
+          }
+        },
+        {
+          "name": "Invoice Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Client Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "clients"]
+            }
+          }
+        },
+        {
+          "name": "Employee Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/stats/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["stats", "employees"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "List Activities (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/activities?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["activities"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20", "description": "Items per page (max 50, default 20)" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Activities (Last 100)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/activities/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["activities", "all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Revenue Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/revenue?period=monthly",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "revenue"],
+              "query": [
+                { "key": "period", "value": "monthly", "description": "monthly, quarterly, or yearly" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Invoice Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/invoices",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Client Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/clients",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "clients"]
+            }
+          }
+        },
+        {
+          "name": "Employee Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "employees"]
+            }
+          }
+        },
+        {
+          "name": "Payment Report",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/reports/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "payments"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

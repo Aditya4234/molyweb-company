@@ -1,0 +1,200 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  email                String    @unique
+  password             String?
+  fullName             String
+  role                 String    @default("EMPLOYEE")
+  isActive             Boolean   @default(true)
+  department           String?
+  employeeId           String?
+  createdBy            String?
+  loginAttempts        Int       @default(0)
+  lockUntil            DateTime?
+  provider             String    @default("credentials")
+  googleId             String?   @unique
+  avatar               String?
+  lastLogin            DateTime?
+  refreshToken         String?
+  resetPasswordToken   String?
+  resetPasswordExpires DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+model Client {
+  id            String   @id @default(uuid())
+  name          String
+  email         String
+  phone         String
+  company       String
+  address       String
+  pincode       String?
+  gstin         String?
+  status        String   @default("active")
+  totalInvoices Int      @default(0)
+  totalAmount   Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Employee {
+  id         String   @id @default(uuid())
+  firstName  String
+  lastName   String
+  email      String
+  phone      String
+  department String
+  position   String
+  salary     Float
+  status     String   @default("active")
+  joinDate   String
+  address    String
+  bankAccount String?
+  ifscCode   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Department {
+  id            String   @id @default(uuid())
+  name          String
+  head          String
+  employeeCount Int      @default(0)
+  budget        Float
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Attendance {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  date         String
+  status       String
+  checkIn      String  @default("-")
+  checkOut     String  @default("-")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model LeaveRequest {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  type         String
+  startDate    String
+  endDate      String
+  reason       String   @default("")
+  status       String   @default("pending")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Payment {
+  id            String   @id @default(uuid())
+  invoiceId     String
+  clientName    String
+  amount        Float
+  method        String
+  status        String   @default("pending")
+  transactionId String
+  date          String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Payroll {
+  id           String   @id @default(uuid())
+  employeeId   String
+  employeeName String
+  month        String
+  year         Int
+  basicSalary  Float
+  allowances   Float   @default(0)
+  deductions   Float   @default(0)
+  netSalary    Float
+  status       String  @default("pending")
+  paidDate     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model BillingPlan {
+  id         String   @id @default(uuid())
+  clientId   String
+  clientName String
+  plan       String
+  amount     Float
+  status     String   @default("active")
+  startDate  String
+  endDate    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Activity {
+  id        String   @id @default(uuid())
+  type      String
+  message   String
+  timestamp String   @default("Just now")
+  user      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LoginAudit {
+  id        String   @id @default(uuid())
+  userId    String?
+  email     String
+  ipAddress String
+  status    String
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
+model Invoice {
+  id           String   @id @default(uuid())
+  clientId     String
+  clientName   String
+  email        String
+  clientAddress String?
+  clientCity   String?
+  clientState  String?
+  amount       Float
+  paidAmount   Float   @default(0)
+  dueDate      String
+  status       String  @default("draft")
+  items        Json
+  invoiceDate  String?
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Settings {
+  id                 String   @id @default("organization")
+  companyName        String   @default("Molyweb Digital Solutions Private Limited")
+  email              String   @default("sales@molyweb.com")
+  phone              String   @default("9453354551")
+  address            String   @default("Flat No. 102, Om Plaza Apartment, Sector-19, Indira Nagar")
+  city               String   @default("Lucknow")
+  state              String   @default("Uttar Pradesh")
+  pincode            String   @default("226016")
+  gstin              String   @default("09AAACM5601QZM")
+  pan                String   @default("AAACM5601Q")
+  website            String   @default("www.molyweb.com")
+  financialYearStart String   @default("April")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
