@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Eye, EyeOff, CheckSquare, Square, ArrowRight } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, CheckSquare, Square, ArrowRight, UserCog, User } from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
 function LoginForm() {
+  const [role, setRole] = useState<"admin" | "employee">("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -33,13 +34,13 @@ function LoginForm() {
     setError("");
     setSubmitting(true);
     try {
-      await login(email, password, "admin");
+      await login(email, password, role);
       if (rememberMe) {
         localStorage.setItem("molyweb_remembered_email", email);
       } else {
         localStorage.removeItem("molyweb_remembered_email");
       }
-      router.push("/admin/dashboard");
+      router.push(role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -54,7 +55,7 @@ function LoginForm() {
     setSubmitting(true);
     try {
       await googleLogin(credentialResponse.credential);
-      router.push("/admin/dashboard");
+      router.push(role === "admin" ? "/admin/dashboard" : "/employee/dashboard");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Google login failed");
     } finally {
@@ -79,14 +80,42 @@ function LoginForm() {
               transition={{ delay: 0.1 }}
               className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-2xl font-bold text-white shadow-lg shadow-blue-500/25"
             >
-              M
+              {role === "admin" ? "M" : "E"}
             </motion.div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900">
               Welcome back
             </h1>
             <p className="mt-1.5 text-sm text-gray-500">
-              Sign in to your MolyWeb Admin account
+              Sign in to your MolyWeb {role === "admin" ? "Admin" : "Employee"} account
             </p>
+          </div>
+
+          {/* Role Toggle */}
+          <div className="mb-6 flex rounded-xl bg-gray-100 p-1">
+            <button
+              type="button"
+              onClick={() => { setRole("admin"); setError(""); }}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                role === "admin"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <UserCog size={16} />
+              Admin
+            </button>
+            <button
+              type="button"
+              onClick={() => { setRole("employee"); setError(""); }}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                role === "employee"
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              <User size={16} />
+              Employee
+            </button>
           </div>
 
           {/* Error */}
