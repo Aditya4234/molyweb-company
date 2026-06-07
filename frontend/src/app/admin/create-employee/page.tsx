@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import {
-  ArrowLeft, Save, User, Briefcase, Banknote, FileText, Shield, CheckCircle,
+  ArrowLeft, Save, User, Briefcase, Banknote, FileText, Shield, CheckCircle, Copy, Eye, EyeOff, Check,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -36,6 +36,8 @@ export default function RegisterEmployeePage() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(true);
+  const [copied, setCopied] = useState(false);
   const [departments, setDepartments] = useState<Department[]>([]);
 
   useEffect(() => {
@@ -87,11 +89,26 @@ export default function RegisterEmployeePage() {
           </div>
           <h2 className="mt-4 text-xl font-bold text-gray-900">Employee Registered!</h2>
           <p className="mt-1 text-sm text-gray-500">Redirecting to employee list...</p>
-          {generatedPassword && (
+          {form.createLogin && (
             <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left">
               <p className="text-sm font-medium text-emerald-800">Login Credentials</p>
               <p className="mt-2 text-xs text-emerald-700">Email: <span className="font-mono font-semibold">{form.email}</span></p>
-              <p className="text-xs text-emerald-700">Password: <span className="font-mono font-semibold">{generatedPassword}</span></p>
+              <p className="text-xs text-emerald-700">
+                Password:{" "}
+                <span className="font-mono font-semibold">{generatedPassword || form.password}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedPassword || form.password);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="inline-flex items-center gap-1 ml-2 text-emerald-700 hover:text-emerald-900 transition"
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  <span className="text-xs">{copied ? "Copied!" : "Copy"}</span>
+                </button>
+              </p>
               <p className="mt-2 text-xs text-emerald-600">Please share these credentials with the employee.</p>
             </div>
           )}
@@ -211,12 +228,44 @@ export default function RegisterEmployeePage() {
                   <div className="space-y-1.5 max-w-sm">
                     <label className={labelClass}>Login Password</label>
                     <div className="flex gap-2">
-                      <input type="password" minLength={6} className={inputClass} placeholder="Leave blank to auto-generate" value={form.password} onChange={(e) => update("password", e.target.value)} />
-                      <button type="button" onClick={generatePassword} className="shrink-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                      <div className="relative flex-1">
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          minLength={6}
+                          className={inputClass + " pr-10"}
+                          placeholder="Leave blank to auto-generate"
+                          value={form.password}
+                          onChange={(e) => update("password", e.target.value)}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      </div>
+                      <button type="button" onClick={() => { generatePassword(); setShowPassword(true); }} className="shrink-0 rounded-xl border border-gray-200 px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
                         Generate
                       </button>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">The employee can log in using their Email ID and this password. Leave blank to auto-generate.</p>
+                    {form.password && (
+                      <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
+                        <span className="text-xs font-mono font-semibold text-amber-800 break-all">{form.password}</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(form.password);
+                            setCopied(true);
+                            setTimeout(() => setCopied(false), 2000);
+                          }}
+                          className="shrink-0 text-amber-600 hover:text-amber-800 transition"
+                        >
+                          {copied ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">The employee can log in using their Email ID and this password. Click Generate to create a strong password.</p>
                   </div>
                 )}
               </div>

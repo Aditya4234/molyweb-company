@@ -18,7 +18,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const isMobile = useMediaQuery("(max-width: 1024px)");
 
   useEffect(() => {
-    if (!loading && !user && !pathname.includes("/login") && !pathname.includes("/forgot-password")) {
+    if (!loading && !user && !pathname.includes("/login") && !pathname.includes("/forgot-password") && pathname !== "/") {
       if (pathname.startsWith("/admin")) {
         router.push("/admin/login");
       } else {
@@ -36,7 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    if (pathname.includes("/login") || pathname.includes("/forgot-password")) {
+    if (pathname === "/" || pathname.includes("/login") || pathname.includes("/forgot-password")) {
       return <>{children}</>;
     }
 
