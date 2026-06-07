@@ -113,7 +113,9 @@ async function seedAdmin() {
   }
 }
 
-async function start(): Promise<void> {
+export { app };
+
+export async function start(): Promise<void> {
   try {
     await db.$connect();
     console.log("✓ Connected to PostgreSQL");
@@ -133,6 +135,8 @@ async function start(): Promise<void> {
   }
 }
 
-start();
+if (process.env.NODE_ENV !== "vercel") {
+  start();
+}
 
 export default app;
