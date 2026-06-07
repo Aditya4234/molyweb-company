@@ -4,11 +4,22 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { motion } from "framer-motion";
-import { Loader2, Mail, Lock, Eye, EyeOff, CheckSquare, Square, ArrowRight, UserCog, User } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Shield, User,
+} from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
+const fadeUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+};
+
+const stagger = {
+  animate: { transition: { staggerChildren: 0.07 } },
+};
 
 function LoginForm() {
   const [role, setRole] = useState<"admin" | "employee">("admin");
@@ -48,8 +59,6 @@ function LoginForm() {
     }
   };
 
-
-
   const handleGoogleSuccess = async (credentialResponse: any) => {
     setError("");
     setSubmitting(true);
@@ -63,183 +72,306 @@ function LoginForm() {
     }
   };
 
+  const isAdmin = role === "admin";
+  const accentRing = isAdmin
+    ? "focus:border-blue-400 focus:ring-blue-100"
+    : "focus:border-emerald-400 focus:ring-emerald-100";
+  const forgotHover = isAdmin
+    ? "hover:text-blue-700"
+    : "hover:text-emerald-700";
+
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4">
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-[#F1F5F9] p-4">
+      <div className="pointer-events-none absolute -top-40 -right-40 h-96 w-96 rounded-full bg-blue-100/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-indigo-100/40 blur-3xl" />
+
       <motion.div
-        initial={{ opacity: 0, y: 24 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-full max-w-[440px]"
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-[550px]"
       >
-        <div className="rounded-3xl border border-slate-200/60 bg-white/90 p-8 shadow-2xl shadow-blue-500/10 backdrop-blur-xl sm:p-10">
-          {/* Logo */}
-          <div className="mb-8 text-center">
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-2xl font-bold text-white shadow-lg shadow-blue-500/25"
-            >
-              {role === "admin" ? "M" : "E"}
-            </motion.div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900">
+        <motion.div
+          variants={stagger}
+          animate="animate"
+          className="overflow-hidden rounded-[32px] border border-white/50 bg-white/70 p-8 shadow-[0_2px_80px_-12px_rgba(37,99,235,0.12),0_8px_32px_-4px_rgba(0,0,0,0.04)] backdrop-blur-2xl sm:p-12"
+        >
+          <motion.div
+            variants={fadeUp}
+            transition={{ delay: 0.08, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-8 text-center"
+          >
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 text-2xl font-bold text-white shadow-lg shadow-blue-500/20 ring-1 ring-white/20">
+              M
+            </div>
+            <h1 className="text-[28px] font-bold leading-tight tracking-tight text-[#0F172A]">
               Welcome back
             </h1>
-            <p className="mt-1.5 text-sm text-gray-500">
-              Sign in to your MolyWeb {role === "admin" ? "Admin" : "Employee"} account
+            <p className="mt-2 text-sm text-gray-400">
+              Sign in to your MolyWeb account
             </p>
-          </div>
+          </motion.div>
 
-          {/* Role Toggle */}
-          <div className="mb-6 flex rounded-xl bg-gray-100 p-1">
-            <button
-              type="button"
-              onClick={() => { setRole("admin"); setError(""); }}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                role === "admin"
-                  ? "bg-white text-blue-700 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <UserCog size={16} />
-              Admin
-            </button>
-            <button
-              type="button"
-              onClick={() => { setRole("employee"); setError(""); }}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                role === "employee"
-                  ? "bg-white text-blue-700 shadow-sm"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <User size={16} />
-              Employee
-            </button>
-          </div>
-
-          {/* Error */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              className="mb-5 overflow-hidden rounded-xl bg-red-50 border border-red-100 px-4 py-3"
-            >
-              <p className="text-sm font-medium text-red-700">{error}</p>
-            </motion.div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="relative">
-                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@company.com"
-                  required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  className="w-full rounded-xl border border-gray-200 bg-gray-50/50 py-2.5 pl-10 pr-10 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
+          <motion.div
+            variants={fadeUp}
+            transition={{ delay: 0.16, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-10"
+          >
+            <div className="relative flex rounded-2xl bg-gray-100/80 p-1.5">
               <button
                 type="button"
-                onClick={() => setRememberMe(!rememberMe)}
-                className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700"
+                onClick={() => { setRole("admin"); setError(""); }}
+                className={`relative z-10 flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
+                  isAdmin
+                    ? "text-white"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
-                {rememberMe ? (
-                  <CheckSquare size={16} className="text-blue-600" />
-                ) : (
-                  <Square size={16} className="text-gray-400" />
-                )}
-                Remember me
+                <Shield size={18} />
+                <span>Admin Login</span>
               </button>
-              <Link
-                href="/forgot-password"
-                className="text-sm font-medium text-blue-600 hover:text-blue-700"
+
+              <button
+                type="button"
+                onClick={() => { setRole("employee"); setError(""); }}
+                className={`relative z-10 flex flex-1 items-center justify-center gap-2.5 rounded-xl px-5 py-3.5 text-sm font-semibold transition-all duration-200 ${
+                  !isAdmin
+                    ? "text-white"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
               >
-                Forgot password?
-              </Link>
+                <User size={18} />
+                <span>Employee Login</span>
+              </button>
+
+              <motion.div
+                layoutId="tab-pill"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                className={`absolute top-1.5 bottom-1.5 rounded-xl shadow-sm ${
+                  isAdmin
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 shadow-blue-500/20"
+                    : "bg-gradient-to-r from-emerald-600 to-teal-600 shadow-emerald-500/20"
+                }`}
+                style={{
+                  left: 0,
+                  width: "50%",
+                  transform: `translateX(${isAdmin ? "0%" : "100%"})`,
+                }}
+              />
             </div>
+          </motion.div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div
+                key="error"
+                initial={{ opacity: 0, y: -6, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -6, height: 0 }}
+                className="mb-6 overflow-hidden"
+              >
+                <div className="rounded-2xl border border-red-100 bg-red-50/80 px-5 py-3.5 backdrop-blur-sm">
+                  <p className="text-sm font-medium text-red-700">{error}</p>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <AnimatePresence mode="wait">
+            <motion.form
+              key={role}
+              initial={{ opacity: 0, x: isAdmin ? -16 : 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: isAdmin ? 16 : -16 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              onSubmit={handleSubmit}
+              className="space-y-5"
             >
-              {submitting ? (
-                <Loader2 size={18} className="animate-spin" />
-              ) : (
-                <ArrowRight size={18} />
-              )}
-              {submitting ? "Signing in..." : "Sign in"}
-            </button>
-          </form>
+              <motion.div
+                variants={fadeUp}
+                transition={{ delay: 0.22, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <label className="mb-2 block text-[13px] font-semibold text-gray-700">
+                  Email address
+                </label>
+                <div className="relative group">
+                  <Mail size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@molyweb.com"
+                    required
+                    className={`w-full rounded-2xl border border-gray-200 bg-white/80 py-3 pl-11 pr-4 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:bg-white focus:ring-2 ${accentRing} group-hover:border-gray-300`}
+                  />
+                </div>
+              </motion.div>
 
-          {/* Divider */}
-          <div className="my-6 flex items-center gap-3">
+              <motion.div
+                variants={fadeUp}
+                transition={{ delay: 0.28, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <label className="mb-2 block text-[13px] font-semibold text-gray-700">
+                  Password
+                </label>
+                <div className="relative group">
+                  <Lock size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 transition-colors group-focus-within:text-blue-500" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    required
+                    className={`w-full rounded-2xl border border-gray-200 bg-white/80 py-3 pl-11 pr-11 text-sm text-gray-900 outline-none transition-all placeholder:text-gray-400 focus:bg-white focus:ring-2 ${accentRing} group-hover:border-gray-300`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUp}
+                transition={{ delay: 0.34, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="flex items-center justify-between pt-1"
+              >
+                <button
+                  type="button"
+                  onClick={() => setRememberMe(!rememberMe)}
+                  className="flex items-center gap-2.5 text-sm text-gray-500 transition-colors hover:text-gray-700"
+                >
+                  <div className={`flex h-[18px] w-[18px] items-center justify-center rounded-md border-2 transition-all ${
+                    rememberMe
+                      ? `${isAdmin ? "border-blue-600 bg-blue-600" : "border-emerald-600 bg-emerald-600"} text-white`
+                      : "border-gray-300 bg-white"
+                  }`}>
+                    {rememberMe && (
+                      <motion.svg
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        viewBox="0 0 12 12"
+                        className="h-2.5 w-2.5"
+                      >
+                        <path
+                          d="M2 6l3 3 5-5"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </motion.svg>
+                    )}
+                  </div>
+                  <span className="text-[13px] font-medium">Remember me</span>
+                </button>
+                <Link
+                  href="/admin/forgot-password"
+                  className={`text-[13px] font-medium text-blue-600 transition-colors ${forgotHover}`}
+                >
+                  Forgot password?
+                </Link>
+              </motion.div>
+
+              <motion.div
+                variants={fadeUp}
+                transition={{ delay: 0.4, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <motion.button
+                  type="submit"
+                  disabled={submitting}
+                  whileHover={submitting ? {} : { scale: 1.015 }}
+                  whileTap={submitting ? {} : { scale: 0.985 }}
+                  className="group relative flex w-full items-center justify-center gap-2.5 overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <div className="pointer-events-none absolute inset-0 -z-0 rounded-2xl bg-white/0 transition-all duration-300 group-hover:bg-white/10" />
+                  {submitting ? (
+                    <Loader2 size={19} className="animate-spin" />
+                  ) : (
+                    <ArrowRight size={19} className="transition-transform duration-300 group-hover:translate-x-0.5" />
+                  )}
+                  <span className="relative z-10">
+                    {submitting ? "Signing in..." : "Sign in"}
+                  </span>
+                </motion.button>
+              </motion.div>
+            </motion.form>
+          </AnimatePresence>
+
+          <motion.div
+            variants={fadeUp}
+            transition={{ delay: 0.46, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="my-8 flex items-center gap-4"
+          >
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-            <span className="text-xs font-medium uppercase tracking-wider text-gray-400">
+            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-gray-400">
               Or continue with
             </span>
             <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-          </div>
+          </motion.div>
 
-          {/* Google Button */}
-          {GOOGLE_CLIENT_ID && (
-            <div className="flex justify-center">
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError("Google sign-in failed")}
-                size="large"
-                width="360"
-                shape="pill"
-                text="continue_with"
-                theme="outline"
-              />
-            </div>
-          )}
+          <motion.div
+            variants={fadeUp}
+            transition={{ delay: 0.52, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="space-y-3.5"
+          >
+            {GOOGLE_CLIENT_ID ? (
+              <div className="flex justify-center">
+                <GoogleLogin
+                  onSuccess={handleGoogleSuccess}
+                  onError={() => setError("Google sign-in failed")}
+                  size="large"
+                  width="100%"
+                  shape="pill"
+                  text="continue_with"
+                  theme="outline"
+                />
+              </div>
+            ) : (
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.015 }}
+                whileTap={{ scale: 0.985 }}
+                onClick={() => {}}
+                className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-600 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                </svg>
+                Continue with Google
+              </motion.button>
+            )}
 
+            <motion.button
+              type="button"
+              whileHover={{ scale: 1.015 }}
+              whileTap={{ scale: 0.985 }}
+              onClick={() => {}}
+              className="flex w-full items-center justify-center gap-3 rounded-2xl border border-gray-200 bg-white px-5 py-3 text-sm font-medium text-gray-600 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-md"
+            >
+              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0">
+                <path d="M11.4 24H0V12.6l5.7-5.4L11.4 24zM12.6 24H24V12.6l-5.7-5.4L12.6 24zM12 13.2 5.7 0h12.6L12 13.2z" fill="#2563EB" />
+              </svg>
+              Continue with Microsoft
+            </motion.button>
+          </motion.div>
+        </motion.div>
 
-        </div>
-
-        {/* Footer */}
-        <p className="mt-6 text-center text-xs text-gray-400">
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7, duration: 0.5 }}
+          className="mt-8 text-center text-xs text-gray-400"
+        >
           &copy; {new Date().getFullYear()} MolyWeb. All rights reserved.
-        </p>
+        </motion.p>
       </motion.div>
     </div>
   );
