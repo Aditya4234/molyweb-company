@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { motion } from "framer-motion";
 import {
-  Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Shield,
+  Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Shield, User,
 } from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
@@ -236,6 +236,39 @@ function LoginForm() {
               </svg>
               Continue with Microsoft
             </motion.button>
+          </motion.div>
+
+          {/* Divider */}
+          <motion.div variants={fadeUp} transition={{ delay: 0.54, duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="my-6 flex items-center gap-4">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+            <span className="text-xs font-semibold uppercase tracking-[0.08em] text-gray-400">Employee Access</span>
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
+          </motion.div>
+
+          {/* Two Employee Login Buttons */}
+          <motion.div variants={fadeUp} transition={{ delay: 0.6, duration: 0.5, ease: [0.16, 1, 0.3, 1] }} className="space-y-3">
+            <Link href="/employee/login">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.015 }}
+                whileTap={{ scale: 0.985 }}
+                className="flex w-full items-center justify-center gap-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-emerald-500/25 transition-all hover:shadow-xl hover:shadow-emerald-500/30"
+              >
+                <User size={18} />
+                Employee Login
+              </motion.button>
+            </Link>
+            <Link href="/employee/login">
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.015 }}
+                whileTap={{ scale: 0.985 }}
+                className="flex w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-emerald-200 bg-emerald-50/50 px-6 py-3.5 text-sm font-semibold text-emerald-700 shadow-sm transition-all hover:border-emerald-300 hover:bg-emerald-100/50 hover:shadow-md"
+              >
+                <User size={18} />
+                Employee Portal
+              </motion.button>
+            </Link>
           </motion.div>
         </motion.div>
 
